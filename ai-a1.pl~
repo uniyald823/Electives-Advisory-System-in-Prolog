@@ -1,0 +1,362 @@
+% fields for Mtech
+/*Defining different fields (Facts) for M.tech students so that they can choose from*/
+
+suggestion :-
+%retracting information from the following functions so that we can store the value in a list and compare and give our advice
+	retractall(about_you(_)),
+	retractall(interest_list(_)),
+	retractall(sgpa(_)),
+	retractall(research(_)),
+	retractall(ll(_)),
+	retractall(job(_)),
+	retractall(pr(_)),
+	retractall(cp(_)),
+	retractall(feedback(_)),
+
+	write('-------------------Artificial Intelligence-----------------'),nl,
+	write('--------------------Advisory System------------------------'),nl,
+	write('-------------------------------------by Drishya Uniyal-----'),nl,
+	write('-------------------------------------MT21119---------------'),nl,
+% calling the functions so that we can take the information about the
+% student.
+
+	write('Hello, How are you?, Myself Drishya'),nl,sleep(0.25),
+	ask_about(_,_),
+	write('What are your interests in Computer Science'), sleep(0.25), nl,
+	ask_Mtech_interests(_),
+	ask_level,
+	ask_research,
+	ask_job, nl,
+	write('Let us get into your background information?'), sleep(0.25),nl ,
+	ask_Project,
+	ask_Marks,
+	ask_CP,
+	write('\t\t\t--------- ADVICE --------'), nl,
+	write('Fields you should be persuing based on your answers - '), nl, sleep(0.25),
+	advice_field(_),
+
+	write('\t\t\t------FUTURE ADVICE FROM OUR OUR SIDE --------'), nl,
+	write('Advice from our is as follows - '), nl, sleep(0.25),
+	advice(_, _, _, _, _, _),
+	feedback.
+
+%defining different rules for the program
+%Student information
+ask_about(X,Y) :-
+	write('What is your name?'),
+	nl,
+	read(X),nl,
+	write(X),nl,
+	write('What is your Age?'),
+	nl,
+	read(Y),nl,
+	write(Y),nl,
+	write('Aamzing!!'),nl,
+	write('Nice to have you!!!!'),nl.
+
+/*In which subject the student has interest, takes the fields defined
+ above and asks for interest.*/
+ask_Mtech_interests(Interest) :-
+	field(Interest),
+	interested(Interest),
+	assert(recommended(Interest)),fail.
+
+
+ask_Mtech_interests(_) :-
+	nl, convert_to_list(List),
+	write('Our advice would be :'),
+	write(List), nl,!,
+	assert(interest_list(List)).
+
+
+interested(Interest) :-
+	nl,
+	write('Are you interested in '), write(Interest), write(':'),
+	read(Y), Y = y,
+	write('Have you done any courses related to this course ?'), write(Interest), write('?'),
+	read(Y), Y = y.
+
+%converting data to list to be stored and then given advice for
+convert_to_list([Px|Tail]) :-
+	field(Px),
+	retract(recommended(Px)),
+	convert_to_list(Tail).
+
+convert_to_list([]).
+
+
+%asking the level of knowledge the child has in the particular course.
+ask_level:- write('What is your level of understanding in the following course?'),nl,
+	    write('Average, Good, Excellent, Poor?'),nl,
+            read(Y),nl,
+	    make_level(Y).
+
+make_level(Y) :- Y = a, assert(ll('Average')).  % all these are rules that help us decide the advice.
+make_level(Y) :- Y = g, assert(ll('Good')).
+make_level(Y) :- Y = e, assert(ll('Excellent')).
+make_level(Y) :- Y = p, assert(ll('Poor')).
+
+
+% Project
+ask_Project:- write('Have you done a Project?'), nl,
+	  read(Y), nl,
+	  make_project(Y).
+make_project(Y) :- Y = y, assert(pr('True')).
+make_project(Y) :- Y = n, assert(pr('False')).
+
+
+% SGPA
+ask_Marks:- write('What is your GPA of Btech?'), nl,
+	  read(Y), nl, make_SGPA(Y).
+make_SGPA(Y) :- Y >= 8, assert(sgpa('excellent')).
+make_SGPA(Y) :- Y < 8, assert(sgpa('good')).
+
+
+% Competetive Programming
+ask_CP:- write('Are you interested in Programming?'), nl, read(Y), nl, make_CP(Y).
+make_CP(Y) :- Y = y, assert(cp('good')).
+make_CP(Y) :- Y = n, assert(cp('bad')).
+
+% Research
+ask_research:- write('Are you interested in Research Role ?'), nl, read(Y), nl, make_research(Y).
+make_research(Y) :- Y = y, assert(research('True')).
+make_research(Y) :- Y = n, assert(research('False')).
+
+% Job
+ask_job:- write('Are you interested in an job ?'), nl, read(Y), nl, make_job(Y).
+make_job(Y) :- Y = y, assert(job('True')).
+make_job(Y) :- Y = n, assert(job('False')).
+
+advice_field([X | Tail]) :- field(X), interest_list([X | Tail]),!, write(X), nl, sleep(0.25),advice_field(Tail).
+advice_field([]).
+advice_field([X | Tail]) :- field(X), write(X), nl, advice_field(Tail), sleep(0.25).
+
+/* taking the data from list and checking for possible advice where
+Level, Reserach etc are the variables which store the value received from the list.*/
+
+%possible test cases.
+%not all test cases have been covered here.
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'True', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 1'), nl,
+	write('Since you are excellent in each field and and want to pursue job in future,it would better to go for a job in your career as you like competetive programming and your sgpa is also excellent'),nl,
+	write('and other indicators seem(GPA, CP) indicate a better position to start a engineer job ').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'False', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 2'), nl,
+	write('It would better to go for a job in your career as you like competetive programming'),nl,
+	write('and other indicators seem(SGPA, CP) indicate a better position to start a engineer job ').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'True', Job = 'False', Project = 'True', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 3'), nl,
+	write('It would better to go for research in your career as you do not want a job'),nl,
+	write('and other indicators seem(SGPA, CP) are great you can think about your job but if you are determined go for research!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'True', Job = 'True', Project = 'False', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 4'), nl,
+	write('It would better to go for a job in your career as you like competetive programming'),nl,
+	write('and other indicators seem(SGPA, CP) indicate a better position to start a engineer job.'),nl,
+        write('If you want to go for higher studies then go for research and do some projects!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'True', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'bad',nl,
+	write('CASE 5'), nl,
+	write('It would better to go for research as you are not interested in competetive programming').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Good',Research = 'True', Job = 'True', Project = 'False', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 6'), nl,
+	write('It would better to go for research as you are well aware of courses and also maintain a good SGPA. You will have to do projects.'),nl,
+	write('You can also go for a job as everything seems great so its your decision whether to study further or do job!! ').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Excellent',Research = 'False', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 7'), nl,
+	write('It would better to go for a job in your career as you like competetive programming and have great knowledge of courses').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Poor',Research = 'True', Job = 'True', Project = 'False', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 8'), nl,
+	write('It would better to go for a job in your career as you like competetive programming and have no interest in research'),nl,
+	write('and other indicators seem(GPA, CP) indicate a better position to start a engineer job ').
+
+advice(Level,Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'True', Job = 'False', Project = 'False',Sgpa = 'excellent', Cp = 'good',
+	write('CASE 9'), nl,
+	write('You can go for research in your career as you are interested in it along with you will have to do projects as well'),nl,
+	write('and other indicators seem(GPA, CP) indicate a better position so you can do everything great! ').
+
+advice(Level,Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+        Level = 'Excellent',Research = 'True', Job = 'False', Project = 'True',Sgpa = 'excellent',
+	write('CASE 10'),nl,
+	write('The interest in research is commendable. You have a good research experince and your SGPA is also great'), nl,
+	write('Our advice would be to do research in your field in your career ahead.').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa),  cp(Cp),
+	Level = 'Poor',Research = 'True', Job = 'False', Project = 'False',Sgpa = 'excellent',
+	write('CASE 11'),nl,
+	write('The interest in research is commendable. You have a good GPA, however no "NO Project" is a hindrace'), nl,
+	write('Our advice would be to engage in a few research projects and then apply for a research fellow position or pursue further studies').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa),cp(Cp),
+        Level = 'Average',Research = 'True', Job = 'True', Project = 'True',Sgpa = 'excellent',Cp = 'bad',
+	write('CASE 12'), nl,
+	write('It would better to consider a research field as you do not like competetive programming'),nl,
+	write('and other indicators seem(GPA, Project) indicate a better position to pursue a research role ').
+
+advice(Level,Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa),cp(Cp),
+        Level = 'Excellent',Research = 'False', Job = 'True',Project = 'False',Sgpa = 'excellent', Cp = 'good',
+	write('CASE 13'), nl,
+	write('You seem to be destined for solid engineer career ahead, you have a good GPA and an interest in competitive programming'), nl,
+	write('Keep going').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+        Level = 'Poor',Research = 'False', Job = 'True',Project = 'True',Sgpa = 'good', Cp = 'good',
+	write('CASE 14'),nl,
+	write('The aim of getting a engineer job is a good option. Your interest in Competitive programming makes it better'), nl,
+	write('Our advice would be to focus on getting a good GPA in the time left, but not having it does not close the doors'), nl,
+	write('keep working').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa),cp(Cp),
+	Level = 'Excellent',Research = 'False', Job = 'False',Project = 'False' ,Cp = 'good',
+	write('CASE 15'), nl,
+	write('Too bad you have no interest in research because you have research experience.'),nl,
+	write('You do not have an interest in job as well'),nl,
+	write('Our advice will be go for a job as you are interested in competetive programming and have great understanding of courses').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+        Level = 'Poor',Research = 'False', Job = 'False',Project = 'True' ,Cp = 'bad',
+	write('CASE 16'), nl,
+	write('Too bad you have no interest in research because you have research experience and  no Competitive programming interest'),
+	write('So we think it should work out for you research').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'False', Job = 'False', Project = 'False' ,Sgpa='bad', Cp = 'bad',
+	write('CASE 17'), nl,
+	write('Testing our program eh,  you are a free soul, develop an interest !!!').
+
+advice(Level,Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa),cp(Cp),
+        Level = 'Excellent',Research = 'True', Job = 'True',Project = 'True' , Sgpa = 'good',Cp = 'good',
+	write('CASE 18'), nl,
+	write('You could pursue either a research role or a engineer role because you have research experience and Competitive programming interest'),
+	write('try for a better Sgpa for further better chances in job!!) ').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+       ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+       Level = 'Poor',Research = 'True', Job = 'True',Project = 'False' ,Sgpa ='good',Cp = 'good',
+	write('CASE 19'), nl,
+	write('You could pursue a engineer role because you have no research experience and have good competetive programming').
+
+advice(Level,Research, Job, Project,Sgpa,Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Good',Research = 'True', Job = 'True',Project = 'False' ,Sgpa='excellent',Cp = 'bad',
+	write('CASE 20'), nl,
+	write('Although you have interests, but you need to think on job or research'),nl,
+	write('Our advice will be to go for a research as you do not like programming').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Poor',Research = 'True', Job = 'True', Project = 'True', Sgpa = 'good', Cp = 'good',nl,
+	write('CASE 21'), nl,
+	write('As you are interested in cp we would recommend you to go for a job and try to maintain a good Sgpa.'),nl,
+	write('Check your interests, whether to do research or not but job seems to be a better option').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Good',Research = 'True', Job = 'False', Project = 'True', Sgpa = 'excellent', Cp = 'bad',nl,
+	write('CASE 22'), nl,
+	write('As you are interested in research and also hold a good sgpa and have projects, you should pursue further studies as job is not a requirement at this stage.'),nl,
+	write('Check your favourite subjects and go for higher studies. Grab the knowledge. Good Luck!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Good',Research = 'True', Job = 'False', Project = 'True', Sgpa = 'good', Cp = 'bad',nl,
+	write('CASE 23'), nl,
+	write('As you are interested in research and have projects, you may pursue further studies as job is not a requirement at this stage.'),nl,
+	write('Check your favourite subjects and go for higher studies.You will do good.!!').
+
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Poor',Research = 'False', Job = 'False', Project = 'False', Sgpa = 'good', Cp = 'bad',nl,
+	write('CASE 24'), nl,
+	write('You really need to work on your thinking and skills.'),nl,
+	write('Check your interests, decide and work upon it').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Average',Research = 'True', Job = 'True', Project = 'False', Sgpa = 'good', Cp = 'bad',nl,
+	write('CASE 25'), nl,
+	write('If you want a job you have to focus on programming!!!. Else a better option would be to pursue higher studies and go in research field as you are interested in it. Choose your subject and work on them, do projects and grab knowledge.You will eventually do good!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Excellent',Research = 'True', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 26'), nl,
+	write('Your interests are great and along with that your sgpa suggests that you are a bright student. You have all the doors opened,you can go for a job, prepare according to that or else you can take up further studies and then get a better job.
+        It completely depends upon your interest now as you have great statistics and can excell in any field. All the very best for future!!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Poor',Research = 'False', Job = 'False', Project = 'False', Sgpa = 'excellent', Cp = 'bad',nl,
+	write('CASE 27'), nl,
+	write('You really need to work on your thinking and skills.'),nl,
+	write('Check your interests, decide and work upon it'),nl,
+	write('Develop an interest, works towards it as your sgpa is very good so you are a bright student just need a good direction.Focus on what to do in future and take a decision whether to get a good job or go for research.
+        You will eventually find your right path!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Good',Research = 'False', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'good',nl,
+	write('CASE 28'), nl,
+	write('Your sgpa is good and you have done projects. Your interest in programming makes you a good candidate for a job.Go for a job work accordingly and prepare yourself. Have a grip on coding and you will eventaully do good!!').
+
+advice(Level, Research, Job, Project,Sgpa, Cp) :-
+	ll(Level),research(Research), job(Job), pr(Project),sgpa(Sgpa), cp(Cp),
+	Level = 'Poor',Research = 'True', Job = 'True', Project = 'True', Sgpa = 'excellent', Cp = 'bad',nl,
+	write('CASE 29'), nl,
+	write('Your sgpa is good and you have done projects. But you have a lack of interest in programming which is actually required for a job. Our suggestion will be you should go for higher studies, develop interest in subjects, have a grip of them, undersatnd the basics and go for stuides. All the best!!').
+
+
+
+
+%clause for asking for advice from student.
+feedback:-
+	nl,
+	write('Was the advice helpful? '), nl,
+	read(Y), assert(feedback(Y)),
+	write('Thanks :)'), nl,
+	write('Have a nice day !!!').
+%we store the data of child in a file.
+program(_):-
+    append('feedback.csv', Stream),
+    forall(ll(Q), write(Stream,Q)), write(Stream, ','),
+    forall(research(Y), write(Stream, Y)), write(Stream, ','),
+    forall(job(X), write(Stream, X)), write(Stream, ','),
+    forall(pr(A), write(Stream, A)), write(Stream, ','),
+    forall(sgpa(B), write(Stream, B)), write(Stream, ','),
+    forall(cp(C), write(Stream,C)), write(Stream, ','),
+    forall(interest_list(G), write(Stream, G)), write(Stream, ','),
+    forall(feedback(J), write(Stream, J)),
+    close(Stream).
